@@ -1,0 +1,256 @@
+% !TeX program = xelatex
+% MAU BAO CAO: bien dich bang XeLaTeX hoac LuaLaTeX, it nhat 2 lan.
+% Quy tac chi tiet va prompt tai su dung: Huong_dan_va_prompt.txt.
+% Day la mau thong nhat dua tren PDF da cung cap, khong phai quy dinh cua truong.
+\documentclass[a4paper,12pt]{article}
+
+% ===== 1. KHO GIAY, LE TRANG, FONT =====
+\usepackage[left=3cm,right=2cm,top=2cm,bottom=2cm,footskip=1cm]{geometry}
+\usepackage{fontspec}
+% Uu tien font Times New Roman cai tren may hoac 4 tep TTF trong fonts/.
+% Khong kem tep font thuong mai trong mau nay.
+\IfFontExistsTF{Times New Roman}{
+  \setmainfont{Times New Roman}
+}{
+  \IfFileExists{fonts/times.ttf}{
+    \setmainfont{times.ttf}[
+      Path=fonts/,
+      BoldFont=timesbd.ttf,
+      ItalicFont=timesi.ttf,
+      BoldItalicFont=timesbi.ttf]
+  }{
+    \IfFontExistsTF{TeX Gyre Termes}{
+      \setmainfont{TeX Gyre Termes}
+      \PackageWarningNoLine{MauBaoCao}{Times New Roman unavailable; using TeX Gyre Termes}
+    }{
+      \setmainfont{DejaVu Serif}
+      \PackageWarningNoLine{MauBaoCao}{Times New Roman unavailable; using DejaVu Serif}
+    }
+  }
+}
+\usepackage{indentfirst}
+\usepackage{microtype}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usepackage{array,tabularx,booktabs,longtable}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{tocloft}
+\usepackage{caption}
+\usepackage{xurl}
+\usepackage[unicode,hidelinks]{hyperref}
+\urlstyle{same}
+
+% 13 pt la co chu; 19.5 pt la khoang cach giua hai duong chan chu.
+% Dinh nghia truc tiep de khong nham voi he so cua goi setspace.
+\renewcommand{\normalsize}{\fontsize{13}{19.5}\selectfont}
+\AtBeginDocument{\normalsize}
+\setlength{\parindent}{0.5cm}
+\setlength{\parskip}{4pt}
+\setlength{\emergencystretch}{2em}
+\raggedbottom
+\setlist{topsep=4pt,itemsep=2pt,parsep=0pt,leftmargin=*}
+
+% ===== 2. BA CAP TIEU DE: 1 / 1.1 / 1.1.1 =====
+\setcounter{secnumdepth}{3}
+\setcounter{tocdepth}{3}
+\renewcommand{\thesection}{\arabic{section}}
+\renewcommand{\thesubsection}{\thesection.\arabic{subsection}}
+\renewcommand{\thesubsubsection}{\thesubsection.\arabic{subsubsection}}
+\titleformat{\section}[hang]
+  {\normalfont\fontsize{16}{20}\selectfont\bfseries}
+  {\thesection.}{0.6em}{}
+\titleformat{\subsection}[hang]
+  {\normalfont\fontsize{14}{18}\selectfont\bfseries}
+  {\thesubsection}{0.6em}{}
+\titleformat{\subsubsection}[hang]
+  {\normalfont\fontsize{13}{17}\selectfont\bfseries}
+  {\thesubsubsection}{0.6em}{}
+\titlespacing*{\section}{0pt}{16pt}{8pt}
+\titlespacing*{\subsection}{0pt}{12pt}{6pt}
+\titlespacing*{\subsubsection}{0pt}{8pt}{4pt}
+
+% ===== 3. MUC LUC VA SO TRANG =====
+\renewcommand{\contentsname}{MỤC LỤC}
+\renewcommand{\refname}{Tài liệu tham khảo}
+\renewcommand{\cfttoctitlefont}{\fontsize{16}{20}\selectfont\bfseries}
+\setlength{\cftbeforetoctitleskip}{0pt}
+\setlength{\cftaftertoctitleskip}{18pt}
+\renewcommand{\cftsecfont}{\normalfont\bfseries}
+\renewcommand{\cftsecpagefont}{\normalfont\bfseries}
+\renewcommand{\cftsubsecfont}{\normalfont}
+\renewcommand{\cftsubsubsecfont}{\normalfont}
+\renewcommand{\cftsecleader}{\cftdotfill{\cftdotsep}}
+\cftsetindents{section}{0em}{2em}
+\cftsetindents{subsection}{2em}{3em}
+\cftsetindents{subsubsection}{5em}{4em}
+\setlength{\cftbeforesecskip}{6pt}
+\makeatletter
+\def\ps@plain{%
+  \let\@oddhead\@empty\let\@evenhead\@empty
+  \def\@oddfoot{\hfil{\normalfont\fontsize{11}{13}\selectfont\thepage}\hfil}%
+  \let\@evenfoot\@oddfoot}
+\makeatother
+\pagestyle{plain}
+
+% ===== 4. BANG, HINH, CHU THICH =====
+\renewcommand{\tablename}{Bảng}
+\renewcommand{\figurename}{Hình}
+\DeclareCaptionFont{reportcaption}{\fontsize{12}{15}\selectfont}
+\captionsetup{font=reportcaption,labelfont=bf,labelsep=period,
+  justification=centering,skip=6pt}
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+\newcommand{\bangfont}{\fontsize{12}{15}\selectfont}
+% Bảng và hình đánh số toàn tài liệu: Bảng 1, Bảng 2; Hình 1, Hình 2.
+
+% ===== 5. THONG TIN CAN THAY TREN BIA =====
+\newcommand{\DonViChuQuan}{ĐẠI HỌC QUỐC GIA HÀ NỘI}
+\newcommand{\TenTruong}{TRƯỜNG ĐẠI HỌC CÔNG NGHỆ}
+\newcommand{\LoaiBaoCao}{REPORT PROGRESSION 1}
+\newcommand{\TenMonHoc}{ĐIỆN TOÁN ĐÁM MÂY}
+\newcommand{\TenDeTai}{SaTiBot - quản lý và tương tác với các tài nguyên AWS bằng ngôn ngữ tự nhiên}
+\newcommand{\GiangVien}{Hoàng Văn Tùng}
+\newcommand{\SoNhom}{10}
+\newcommand{\LopMonHoc}{2627_INT3319_1}
+\newcommand{\DiaDiemThoiGian}{Hà Nội, Tháng 10/2026}
+\hypersetup{pdftitle={Mẫu báo cáo học phần},pdfauthor={Nhóm thực hiện}}
+
+\begin{document}
+
+% ===== 6. TRANG BIA =====
+\begin{titlepage}
+\thispagestyle{empty}
+% Khung doi theo vung le: trai 3 cm, phai 2 cm, tren/duoi 2 cm.
+\begin{tikzpicture}[remember picture,overlay]
+  \draw[line width=2pt]
+    ([xshift=3cm,yshift=-2cm]current page.north west)
+    rectangle ([xshift=-2cm,yshift=2cm]current page.south east);
+  \draw[line width=0.5pt]
+    ([xshift=3.12cm,yshift=-2.12cm]current page.north west)
+    rectangle ([xshift=-2.12cm,yshift=2.12cm]current page.south east);
+\end{tikzpicture}\par
+\centering
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0pt}
+\vspace*{0.8cm}
+{\fontsize{14}{18}\selectfont\bfseries\DonViChuQuan\par}
+\vspace{0.15cm}
+{\fontsize{15}{20}\selectfont\bfseries\TenTruong\par}
+\vspace{0.25cm}
+\rule{5cm}{0.4pt}\par
+\vspace{0.5cm}
+% Dat logo.png cung thu muc voi tep .tex; neu chua co se hien o giu cho.
+\IfFileExists{logo.png}{
+  \includegraphics[width=3.8cm,height=3.8cm,keepaspectratio]{logo.png}
+}{
+  \fbox{\parbox[c][3.4cm][c]{3.4cm}{\centering
+    \fontsize{11}{14}\selectfont LOGO TRƯỜNG\\(logo.png)}}
+}\par
+\vspace{0.7cm}
+{\fontsize{22}{27}\selectfont\bfseries\LoaiBaoCao\par}
+\vspace{0.35cm}
+\begin{minipage}{0.9\textwidth}\centering
+  {\fontsize{15}{20}\selectfont\bfseries MÔN HỌC: \TenMonHoc\par}
+\end{minipage}\par
+\vspace{0.6cm}
+{\fontsize{13}{17}\selectfont\bfseries ĐỀ TÀI\par}
+\vspace{0.12cm}
+\begin{minipage}{0.9\textwidth}\centering
+  {\fontsize{16}{21}\selectfont\bfseries\TenDeTai\par}
+\end{minipage}\par
+\vspace{0.65cm}
+{\fontsize{13}{19.5}\selectfont
+\renewcommand{\arraystretch}{1.1}
+\begin{tabular}{@{}>{\raggedright\arraybackslash\bfseries}p{4.8cm}>{\raggedright\arraybackslash}p{8cm}@{}}
+  Giảng viên môn học: & \GiangVien\\
+  Nhóm: & \SoNhom\\
+  Sinh viên thực hiện: & Cao Anh Minh (Trưởng nhóm)\\
+                      & Trịnh Thiên Quang\\
+                      & Phạm Đức Hùng\\
+                      & Đức Huy\\
+  Lớp môn học: & \LopMonHoc
+\end{tabular}\par}
+\vfill
+{\fontsize{13}{17}\selectfont\bfseries\DiaDiemThoiGian\par}
+\vspace*{0.5cm}
+\end{titlepage}
+
+% ===== 7. MUC LUC TU DONG =====
+\pagenumbering{roman}
+\tableofcontents
+\clearpage
+\pagenumbering{arabic}
+
+% ===== 8. NOI DUNG MAU: THAY BANG NOI DUNG BAO CAO =====
+% Khong go so thu tu vao trong {Ten tieu de}.
+\section{Đặt vấn đề}
+Trình bày vấn đề nghiên cứu, lý do lựa chọn đề tài và ý nghĩa thực tiễn.
+Đây là nội dung giữ chỗ để minh họa cách trình bày, cần thay bằng nội dung
+thật của báo cáo trước khi nộp.
+
+\subsection{Bối cảnh thực tế}
+Giới thiệu bối cảnh, đối tượng sử dụng và nhu cầu cần giải quyết.
+
+\subsubsection{Tình huống thứ nhất}
+Mô tả tình huống, vấn đề phát sinh và nhu cầu hỗ trợ. Tiêu đề cấp 3
+được đặt trên dòng riêng và xuất hiện trong mục lục.
+
+\subsubsection{Tình huống thứ hai}
+Mô tả một tình huống khác để làm rõ phạm vi của bài toán.
+
+\subsection{Các khái niệm và phạm vi}
+\begin{itemize}
+  \item \textbf{Khái niệm chính:} Giải thích ngắn gọn thuật ngữ được sử dụng.
+  \item \textbf{Phạm vi:} Nêu đối tượng, dữ liệu và giới hạn nghiên cứu.
+\end{itemize}
+
+\section{Khảo sát giải pháp và xác định khoảng trống}
+\subsection{Tiêu chí đánh giá}
+Nêu các tiêu chí dùng để đối chiếu những giải pháp liên quan.
+
+\subsection{Các giải pháp liên quan}
+Bảng~\ref{tab:khaosat} minh họa cách trình bày bảng. Trích dẫn tài liệu
+theo số bằng lệnh trích dẫn tự động, ví dụ~\cite{nguonmau}.
+
+\begin{table}[htbp]
+\centering
+\caption{Mẫu bảng khảo sát}
+\label{tab:khaosat}
+\bangfont
+\begin{tabularx}{\linewidth}{@{}YYYY@{}}
+\toprule
+\textbf{Giải pháp} & \textbf{Tiêu chí 1} & \textbf{Tiêu chí 2} & \textbf{Tiêu chí 3}\\
+\midrule
+Giải pháp A & Nhận xét ngắn gọn. & Nhận xét ngắn gọn. & Nhận xét ngắn gọn.\\
+Giải pháp B & Nhận xét ngắn gọn. & Nhận xét ngắn gọn. & Nhận xét ngắn gọn.\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Nhận xét và khoảng trống}
+Tổng hợp kết quả khảo sát và xác định vấn đề còn cần nghiên cứu.
+
+\section{Câu hỏi nghiên cứu}
+\subsection{Câu hỏi thứ nhất}
+Nêu câu hỏi nghiên cứu rõ ràng, gắn với vấn đề đã xác định.
+\subsection{Câu hỏi thứ hai}
+Nêu câu hỏi bổ sung nếu cần thiết.
+
+\section{Mục tiêu dự kiến và giải pháp tổng quan}
+\subsection{Mục tiêu dự kiến}
+Nêu các mục tiêu cụ thể và kết quả đầu ra tương ứng.
+\subsection{Giải pháp tổng quan}
+Mô tả phương pháp hoặc hướng tiếp cận dự kiến.
+
+% ===== 9. TAI LIEU THAM KHAO =====
+\clearpage
+\phantomsection
+\addcontentsline{toc}{section}{Tài liệu tham khảo}
+\begin{thebibliography}{99}
+\bibitem{nguonmau}
+[Tác giả]. [Năm]. \textit{[Tên tài liệu]}. [Nơi công bố].
+[DOI hoặc URL thực tế, nếu có].
+% Chi la cho giu mau, khong phai tai lieu tham khao thuc.
+\end{thebibliography}
+
+\end{document}

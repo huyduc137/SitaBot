@@ -1,0 +1,123 @@
+MẪU TRÌNH BÀY BÁO CÁO LATEX — HƯỚNG DẪN VÀ PROMPT TÁI SỬ DỤNG
+
+1. MỤC ĐÍCH VÀ CƠ SỞ
+
+Mẫu được xây dựng từ “Báo cáo giữa kì.pdf” do người dùng cung cấp. Đây là quy ước trình bày thống nhất cho các báo cáo tiếp theo, không phải khẳng định về quy định chính thức của trường.
+
+PDF gốc dùng khổ A4, Times New Roman, nội dung khoảng 13 pt, tiêu đề cấp 1 khoảng 16 pt, cấp 2 khoảng 14 pt. Các số đo PDF tương ứng khoảng 12,95/15,94/13,95 do khác biệt giữa đơn vị điểm PDF và điểm TeX. Khung bìa và vùng nội dung cho thấy lề trái khoảng 3 cm, phải 2 cm, trên/dưới khoảng 2 cm.
+
+Mẫu giữ phong cách này và chuẩn hóa thêm: tiêu đề cấp 3 đặt trên dòng riêng; cả ba cấp tự đánh số và có trong mục lục; bảng và hình có cách đánh số thống nhất. Trong PDF gốc, các mục 1.1.1 và 1.1.2 nằm cùng dòng với nội dung và không xuất hiện trong mục lục.
+
+2. CÁCH DÙNG
+
+- Dùng Mau_bao_cao.tex làm tệp chính; chọn trình biên dịch XeLaTeX hoặc LuaLaTeX, không dùng pdfLaTeX.
+- Thay thông tin trong phần “THONG TIN CAN THAY TREN BIA”, danh sách sinh viên và phần nội dung mẫu.
+- Đặt logo chính thức của trường vào tệp logo.png cùng thư mục với tệp .tex. Nếu thiếu logo, mẫu hiện ô giữ chỗ. Không nộp báo cáo khi vẫn còn ô giữ chỗ.
+- Font chuẩn là Times New Roman. Nếu máy không có font, có thể cung cấp bốn tệp có quyền sử dụng: fonts/times.ttf, fonts/timesbd.ttf, fonts/timesi.ttf, fonts/timesbi.ttf. Mẫu không kèm font thương mại.
+- Khi thiếu Times New Roman, mẫu dùng TeX Gyre Termes, hoặc DejaVu Serif nếu font đó cũng thiếu, để vẫn biên dịch được. Font dự phòng KHÔNG phải Times New Roman và có thể làm thay đổi xuống dòng, số trang. Muốn bản nộp đúng font thì phải cung cấp Times New Roman.
+- Biên dịch ít nhất hai lần sau khi sửa tiêu đề, mục lục hoặc trích dẫn; tiếp tục nếu trình biên dịch còn yêu cầu chạy lại.
+- Kiểm tra trang bìa vẫn vừa một trang, mục lục đủ ba cấp, không tràn bảng, không còn dấu ?? hoặc nội dung giữ chỗ.
+- Bố cục nội dung mẫu gồm: Đặt vấn đề; Khảo sát giải pháp và xác định khoảng trống; Câu hỏi nghiên cứu; Mục tiêu dự kiến và giải pháp tổng quan; Tài liệu tham khảo. Có thể thay tên và số lượng phần theo đề bài.
+
+3. QUY CÁCH CHI TIẾT
+
+3.1. Trang và văn bản
+
+- Khổ A4 dọc: 210 × 297 mm.
+- Lề trái 3 cm; phải 2 cm; trên 2 cm; dưới 2 cm.
+- Toàn văn dùng Times New Roman, chữ đen. Không đổi sang font sans serif cho tiêu đề.
+- Nội dung: 13 pt, kiểu đứng, căn đều hai lề.
+- Khoảng cách dòng được đặt trực tiếp bằng baseline 19,5 pt cho nội dung 13 pt. Không đặt thêm hệ số giãn dòng 1,5 lên giá trị này.
+- Thụt đầu dòng 0,5 cm; cách đoạn 4 pt; đoạn đầu sau tiêu đề cũng thụt đầu dòng.
+- Từ cần nhấn mạnh dùng đậm; thuật ngữ hoặc tên tài liệu có thể dùng nghiêng khi cần.
+- Không dùng xuống dòng cưỡng bức \\ để ngắt các đoạn văn thông thường.
+- Không có nội dung ở đầu trang. Số trang 11 pt, kiểu đứng, giữa chân trang; footskip 1 cm.
+
+3.2. Trang bìa
+
+Bìa chiếm đúng một trang, không hiện số trang, không đưa vào mục lục. Các khối căn giữa theo vùng nội dung có lề trái 3 cm và phải 2 cm; khối thông tin người thực hiện căn trái trong bảng hai cột đặt giữa trang.
+
+Thứ tự từ trên xuống:
+1) Cơ quan chủ quản: 14 pt, đậm, IN HOA.
+2) Tên trường: 15 pt, đậm, IN HOA.
+3) Đường kẻ ngang mảnh dài 5 cm và logo rộng/cao tối đa 3,8 cm, giữ đúng tỷ lệ.
+4) Loại báo cáo, ví dụ BÁO CÁO GIỮA KỲ: 22 pt, đậm, IN HOA.
+5) MÔN HỌC: TÊN MÔN HỌC: 15 pt, đậm, IN HOA; có thể xuống hai dòng.
+6) Nhãn ĐỀ TÀI: 13 pt, đậm, IN HOA.
+7) Tên đề tài: 16 pt, đậm, viết hoa thông thường, căn giữa, tự xuống dòng.
+8) Khối giảng viên, nhóm, sinh viên, mã sinh viên, lớp môn học: 13 pt; nhãn cột trái đậm, giá trị cột phải thường. Mỗi sinh viên một dòng.
+9) Địa điểm và thời gian ở gần cuối trang: 13 pt, đậm, căn giữa.
+
+Khung bìa hai nét: nét ngoài 2 pt, nét trong 0,5 pt, khoảng cách hai nét 0,12 cm. Khung ngoài trùng vùng lề nêu trên. Chỉ vẽ khung ở bìa. Không dùng nhiều dòng trống để đẩy ngày tháng xuống cuối trang; dùng \vfill. Nếu tiêu đề hoặc danh sách sinh viên dài, điều chỉnh khoảng trống bìa vừa đủ và kiểm tra lại một trang.
+
+3.3. Ba cấp tiêu đề
+
+Header/Heading 1: \section{Tên mục}
+- Dạng hiển thị: 1. Tên mục; 2. Tên mục.
+- Times New Roman 16 pt, đậm, kiểu đứng, căn trái; baseline 20 pt.
+- Khoảng trước 16 pt, sau 8 pt; không bắt buộc sang trang mới.
+
+Header/Heading 2: \subsection{Tên mục con}
+- Dạng hiển thị: 1.1 Tên mục con; 1.2 Tên mục con.
+- Times New Roman 14 pt, đậm, kiểu đứng, căn trái; baseline 18 pt.
+- Khoảng trước 12 pt, sau 6 pt.
+
+Header/Heading 3: \subsubsection{Tên tiểu mục}
+- Dạng hiển thị: 1.1.1 Tên tiểu mục; 1.1.2 Tên tiểu mục.
+- Times New Roman 13 pt, đậm, kiểu đứng, căn trái; baseline 17 pt.
+- Khoảng trước 8 pt, sau 4 pt; nội dung bắt đầu ở đoạn tiếp theo.
+
+Các khoảng trước/sau là khoảng co giãn theo cơ chế dàn trang của LaTeX, có thể được xử lý khác ở đầu trang. Không gõ số 1.1 hoặc 1.1.1 trong tên tiêu đề; không dùng \textbf để giả lập tiêu đề có phân cấp; không nhảy trực tiếp từ cấp 1 sang cấp 3. Dấu chấm cuối chỉ áp dụng sau số cấp 1 trong phần nội dung. Đặt secnumdepth=3 và tocdepth=3.
+
+3.4. Mục lục và số trang
+
+- Mục lục đứng sau bìa và trước nội dung, tạo bằng \tableofcontents.
+- Tiêu đề MỤC LỤC: 16 pt, đậm, IN HOA, căn trái.
+- Các dòng mục lục: 13 pt; cấp 1 đậm, cấp 2 và 3 thường; thụt lề theo cấp.
+- Có dấu chấm dẫn tới số trang ở bên phải; tiêu đề dài được tự xuống dòng.
+- Mục lục hiển thị cả ba cấp, kể cả 1.1.1 và 1.1.2.
+- Trang mục lục dùng số La Mã thường i, ii, iii...; nội dung bắt đầu lại từ số Ả Rập 1.
+- Tài liệu tham khảo có trong mục lục nhưng không mang số mục. Trang này tiếp tục số trang của nội dung.
+
+3.5. Bảng, hình, tài liệu tham khảo
+
+- Nội dung bảng: 12 pt, baseline 15 pt; hàng tiêu đề đậm; ưu tiên căn trái văn bản trong ô.
+- Chú thích bảng/hình: 12 pt; nhãn Bảng 1 hoặc Hình 1 đậm, tên chú thích thường; căn giữa.
+- Chú thích bảng đặt trên bảng; chú thích hình đặt dưới hình.
+- Bảng và hình đánh số liên tục riêng trên toàn tài liệu: Bảng 1, Bảng 2...; Hình 1, Hình 2... Không trộn với cách đánh số theo mục.
+- Dùng \caption, \label và \ref; đặt \label sau \caption. Không gõ số bảng/hình thủ công.
+- Bảng dài dùng longtable với hàng tiêu đề lặp lại. Nếu có dòng “tiếp theo”, dùng \thetable để giữ nguyên số bảng, không tăng bộ đếm và không tự gõ số mới.
+- Tài liệu tham khảo bắt đầu ở trang mới, tiêu đề 16 pt đậm, nội dung 13 pt. Trích dẫn theo số [1], [2] bằng \cite và \bibitem. Không tạo nguồn giả.
+- Ký tự đặc biệt trong văn bản LaTeX cần được escape: %, &, _, #...; URL đưa vào \url{...}.
+
+4. PROMPT CÓ THỂ GỬI NGUYÊN VĂN CHO CHATGPT
+
+--- BẮT ĐẦU PROMPT ---
+
+Hãy trình bày nội dung tôi cung cấp thành một báo cáo LaTeX tiếng Việt hoàn chỉnh. Dùng tệp Mau_bao_cao.tex đính kèm làm mẫu nền và tuân thủ toàn bộ quy cách trong Huong_dan_va_prompt.txt. Đây là mẫu trình bày của tôi, không tự coi là quy định chính thức của trường.
+
+Các yêu cầu bắt buộc:
+1. Dùng XeLaTeX hoặc LuaLaTeX, documentclass article, A4 dọc. Lề trái 3 cm; phải, trên và dưới 2 cm. Font chuẩn Times New Roman; nội dung 13 pt, baseline 19,5 pt, căn đều hai lề, thụt đầu dòng 0,5 cm, cách đoạn 4 pt. Nếu thiếu font, phải nói rõ font dự phòng; không khẳng định bản dùng font thay thế là Times New Roman.
+2. Giữ trang bìa một trang, khung đôi, logo, cơ quan chủ quản 14 pt đậm, tên trường 15 pt đậm, tên loại báo cáo 22 pt đậm, môn học 15 pt đậm, nhãn ĐỀ TÀI 13 pt đậm, tên đề tài 16 pt đậm, thông tin giảng viên/nhóm/sinh viên/lớp 13 pt và địa điểm/thời gian 13 pt đậm. Không hiện số trang trên bìa.
+3. Dùng \section cho cấp 1, 16 pt đậm, dạng “1. Tên mục”; \subsection cho cấp 2, 14 pt đậm, dạng “1.1 Tên mục”; \subsubsection cho cấp 3, 13 pt đậm, dạng “1.1.1 Tên mục”. Cả ba cấp dùng Times New Roman, căn trái, đặt trên dòng riêng. Không đánh số thủ công trong tên tiêu đề.
+4. Tạo mục lục tự động đủ ba cấp. Tiêu đề MỤC LỤC 16 pt đậm; các dòng 13 pt, cấp 1 đậm. Mục lục dùng số trang i, ii...; nội dung bắt đầu lại từ 1. Số trang 11 pt giữa chân trang.
+5. Nội dung bảng 12 pt; chú thích bảng/hình 12 pt, nhãn đậm. Chú thích bảng ở trên, hình ở dưới. Đánh số bảng và hình liên tục riêng trên toàn tài liệu bằng lệnh LaTeX. Tài liệu tham khảo không đánh số mục nhưng phải có trong mục lục.
+6. Giữ nguyên nội dung được cung cấp, trừ khi tôi yêu cầu sửa nội dung. Chỉ tổ chức thành các cấp tiêu đề hợp lý. Không tự thêm số liệu, nhận xét, tác giả hay tài liệu tham khảo. Thông tin chưa có phải để chỗ điền rõ ràng.
+7. Trả về mã .tex đầy đủ từ \documentclass đến \end{document}, có thể biên dịch. Giữ nguyên phần thiết lập của mẫu nếu không có yêu cầu thay đổi. Nếu cần tệp logo/font/hình riêng, liệt kê đúng tên và vị trí cần đặt. Không khẳng định đã biên dịch nếu chưa thực hiện.
+
+Thông tin trang bìa:
+- Cơ quan chủ quản: [điền]
+- Trường/khoa: [điền]
+- Loại báo cáo: [điền]
+- Môn học: [điền]
+- Đề tài: [điền]
+- Giảng viên: [điền]
+- Nhóm: [điền]
+- Sinh viên và mã sinh viên: [điền]
+- Lớp môn học: [điền]
+- Địa điểm, thời gian: [điền]
+
+Nội dung cần trình bày:
+[DÁN NỘI DUNG BÁO CÁO TẠI ĐÂY]
+
+--- KẾT THÚC PROMPT ---
