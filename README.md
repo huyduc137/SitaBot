@@ -60,6 +60,24 @@ Tài khoản SatiBot và tài khoản AWS được quản lý tách biệt; Sati
 
 Yêu cầu: **Python 3.12**, **Node.js 22**, **AWS CDK v2**.
 
+> [!WARNING]
+> SatiBot hiện chỉ hỗ trợ **một tác vụ trong mỗi lượt yêu cầu**, chưa tự động thực hiện chuỗi nhiều thao tác có quan hệ phụ thuộc. Ví dụ, yêu cầu “tạo role, cấp quyền S3 rồi gắn vào EC2” cần được tách thành các tác vụ riêng; từng tác vụ phải nằm trong phạm vi công cụ được hỗ trợ. Các thao tác thay đổi tài nguyên cần người dùng xác nhận trước khi thực thi.
+
+## Chức năng hiện có
+
+SatiBot hỗ trợ quản trị bốn nhóm tài nguyên AWS bằng ngôn ngữ tự nhiên tiếng Việt:
+
+| Module | Chức năng hỗ trợ |
+|---|---|
+| **Amazon EC2** | Tạo, liệt kê và xem chi tiết instance; bật, tắt, khởi động lại và xóa instance; truy vấn CPU qua CloudWatch; kiểm tra rủi ro cấu hình Security Group. |
+| **Amazon S3** | Tạo bucket private; quét và chặn public access; kiểm tra dữ liệu trước khi xóa bucket có xác nhận; cấu hình lifecycle; tạo URL tải tạm thời; thống kê dung lượng và ước tính chi phí lưu trữ. |
+| **AWS IAM** | Tra cứu, tạo, cập nhật và xóa Role/Policy; quản lý trust policy, managed policy và inline policy; gắn/tháo managed policy khỏi Role; kiểm tra cấu trúc policy; preview và đối soát liên kết trước khi xóa. |
+| **AWS Lambda** | Tạo, liệt kê, xem cấu hình và xóa function; đọc/cập nhật mã nguồn; invoke với payload JSON; điều chỉnh memory/timeout; tạo Function URL; cấu hình version, alias và retry; chẩn đoán cấu hình và bật/tắt giới hạn thực thi khẩn cấp. |
+
+Ngoài ra, hệ thống cung cấp đăng nhập qua Amazon Cognito, kết nối tài khoản AWS bằng STS AssumeRole, cập nhật kết quả bất đồng bộ và tra cứu lịch sử tác vụ.
+
+**Giới hạn phạm vi:** Module IAM chỉ quản lý Role và Policy, chưa hỗ trợ quản lý User/Group hoặc gắn Role vào EC2. Khả năng thực thi thực tế phụ thuộc vào quyền của IAM Role trong tài khoản AWS đã kết nối.
+
 ```bash
 # Cài đặt thư viện, đóng gói artifact Lambda và chạy kiểm thử backend
 python -m pip install -r requirements-dev.txt
