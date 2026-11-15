@@ -59,12 +59,21 @@ Tài khoản SatiBot và tài khoản AWS được quản lý tách biệt; Sati
 ## Cài đặt và kiểm thử cục bộ
 
 Yêu cầu: **Python 3.12**, **Node.js 22**, **AWS CDK v2**.
+```bash
+# Cài đặt thư viện, đóng gói artifact Lambda và chạy kiểm thử backend
+python -m pip install -r requirements-dev.txt
+python scripts/package_backend.py --with-dependencies
+python -m pytest -q
 
-> [!WARNING]
-> SatiBot hiện chỉ hỗ trợ **một tác vụ trong mỗi lượt yêu cầu**, chưa tự động thực hiện chuỗi nhiều thao tác có quan hệ phụ thuộc. Ví dụ, yêu cầu “tạo role, cấp quyền S3 rồi gắn vào EC2” cần được tách thành các tác vụ riêng; từng tác vụ phải nằm trong phạm vi công cụ được hỗ trợ. Các thao tác thay đổi tài nguyên cần người dùng xác nhận trước khi thực thi.
+# Cài đặt, kiểm thử và build frontend
+npm --prefix frontend ci
+npm --prefix frontend test
+npm --prefix frontend run build
+```
 
 ## Chức năng hiện có
-
+> [!WARNING]
+> SatiBot hiện chỉ hỗ trợ **một tác vụ trong mỗi lượt yêu cầu**, chưa tự động thực hiện chuỗi nhiều thao tác có quan hệ phụ thuộc. Ví dụ, yêu cầu “tạo role, cấp quyền S3 rồi gắn vào EC2” cần được tách thành các tác vụ riêng; từng tác vụ phải nằm trong phạm vi công cụ được hỗ trợ. Các thao tác thay đổi tài nguyên cần người dùng xác nhận trước khi thực thi.
 SatiBot hỗ trợ quản trị bốn nhóm tài nguyên AWS bằng ngôn ngữ tự nhiên tiếng Việt:
 
 | Module | Chức năng hỗ trợ |
@@ -78,15 +87,5 @@ Ngoài ra, hệ thống cung cấp đăng nhập qua Amazon Cognito, kết nối
 
 **Giới hạn phạm vi:** Module IAM chỉ quản lý Role và Policy, chưa hỗ trợ quản lý User/Group hoặc gắn Role vào EC2. Khả năng thực thi thực tế phụ thuộc vào quyền của IAM Role trong tài khoản AWS đã kết nối.
 
-```bash
-# Cài đặt thư viện, đóng gói artifact Lambda và chạy kiểm thử backend
-python -m pip install -r requirements-dev.txt
-python scripts/package_backend.py --with-dependencies
-python -m pytest -q
 
-# Cài đặt, kiểm thử và build frontend
-npm --prefix frontend ci
-npm --prefix frontend test
-npm --prefix frontend run build
-```
 
