@@ -107,3 +107,11 @@ def validate_call(name, parameters):
 def llm_tools():
     _ensure_cache()
     return deepcopy(list(_LLM_TOOLS_CACHE))
+
+
+def parameter_errors(name, parameters):
+    """Expose schema constraints for chat clarification without accepting invalid calls."""
+    tools = _ensure_cache()
+    if not isinstance(name, str) or name not in tools:
+        raise BackendError("UnsupportedTool", "Công cụ chưa có schema được đăng ký.")
+    return list(_VALIDATOR_CACHE[name].iter_errors(parameters))

@@ -46,20 +46,28 @@ def site_files(site):
     return [(source, "index.html")]
 
 
-def preview_auth_config(session, distribution_domain):
-    outputs = stack_outputs(session, "ap-southeast-1", "AuthStack")
-    if outputs.get("CallbackUrl") != f"https://{distribution_domain}/":
-        raise RuntimeError("Cognito callback does not match the primary CloudFront distribution")
-    if not all(outputs.get(key) for key in ("HostedDomain", "UserPoolClientId")):
+def preview_auth_config(session, frontend_origin, auth_stack="AuthStack"):
+    outputs = stack_outputs(session, "ap-southeast-1", auth_stack)
+    if not all(outputs.get(key) for key in ("HostedDomain", "UserPoolId", "UserPoolClientId")):
         raise RuntimeError("Cognito stack is missing browser client outputs")
+    callback = frontend_origin + "/"
+    client = session.client("cognito-idp", region_name="ap-southeast-1").describe_user_pool_client(
+        UserPoolId=outputs["UserPoolId"], ClientId=outputs["UserPoolClientId"]
+    )["UserPoolClient"]
+    if callback not in client.get("CallbackURLs", []) or callback not in client.get("LogoutURLs", []):
+        raise RuntimeError("Frontend URL must be registered in Cognito callback and logout URLs")
+    if (not client.get("AllowedOAuthFlowsUserPoolClient") or
+            "code" not in client.get("AllowedOAuthFlows", []) or
+            "openid" not in client.get("AllowedOAuthScopes", []) or client.get("ClientSecret")):
+        raise RuntimeError("Cognito browser client requires code flow, openid and no client secret")
     return {
         "domain": outputs["HostedDomain"],
         "client_id": outputs["UserPoolClientId"],
-        "redirect_uri": outputs["CallbackUrl"],
+        "redirect_uri": callback,
     }
 
 
-def publish_site(session, site, appsync_graphql_url=""):
+def publish_site(session, site, appsync_graphql_url="", *, frontend_origin="", auth_stack="AuthStack"):
     region, stack_name, output_prefix = SITES[site]
     files = site_files(site)
     outputs = stack_outputs(session, region, stack_name)
@@ -88,7 +96,14 @@ def publish_site(session, site, appsync_graphql_url=""):
         config = {"api_enabled": api_enabled, "tools_loaded": len(registry())}
         if appsync_graphql_url:
             config["appsync"] = {"graphql_url": appsync_graphql_url}
-        auth = preview_auth_config(session, outputs[f"{output_prefix}DistributionDomain"])
+        origin = frontend_origin or f"https://{outputs['PrimaryDistributionDomain']}"
+        if not re.fullmatch(r"https://[a-z0-9.-]+", origin):
+            raise ValueError("Frontend origin must be an HTTPS hostname without a path")
+        hostname = urlsplit(origin).hostname
+        allowed_hosts = [outputs["PrimaryDistributionDomain"], *distribution.get("Aliases", {}).get("Items", [])]
+        if hostname not in allowed_hosts:
+            raise RuntimeError("Frontend hostname must belong to the primary CloudFront distribution")
+        auth = preview_auth_config(session, origin, auth_stack)
         if not auth:
             raise RuntimeError("Cognito configuration is required before publishing the demo")
         config["auth"] = auth
@@ -136,6 +151,8 @@ def main():
     parser.add_argument("--profile", required=True, help="AWS CLI profile")
     parser.add_argument("--expected-account", required=True, help="12-digit AWS account ID")
     parser.add_argument("--site", choices=(*SITES, "both"), default="both")
+    parser.add_argument("--frontend-origin", default="", help="HTTPS frontend origin, for example https://satibot.id.vn")
+    parser.add_argument("--auth-stack", default="AuthStack", help="Cognito stack supplying the browser pool and client")
     parser.add_argument("--appsync-graphql-url", default="", help="AppSync GraphQL HTTPS endpoint, after the API is deployed")
     args = parser.parse_args()
 
@@ -150,7 +167,8 @@ def main():
         )
 
     for site in ("error", "primary") if args.site == "both" else (args.site,):
-        publish_site(session, site, args.appsync_graphql_url)
+        publish_site(session, site, args.appsync_graphql_url,
+                     frontend_origin=args.frontend_origin, auth_stack=args.auth_stack)
 
 
 if __name__ == "__main__":
