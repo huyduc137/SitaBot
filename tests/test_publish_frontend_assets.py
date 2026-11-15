@@ -24,6 +24,7 @@ def test_primary_site_config_uses_deployed_cloudfront_behavior(monkeypatch, tmp_
             "CallbackUrl": "https://example.cloudfront.net/",
             "HostedDomain": "example.auth.ap-southeast-1.amazoncognito.com",
             "UserPoolClientId": "example-client",
+            "UserPoolId": "ap-southeast-1_example",
         },
     }[stack_name])
 
@@ -36,8 +37,15 @@ def test_primary_site_config_uses_deployed_cloudfront_behavior(monkeypatch, tmp_
     }
     cloudfront_client.create_invalidation.return_value = {"Invalidation": {"Id": "invalidation-1"}}
     session = Mock()
+    cognito_client = Mock()
+    cognito_client.describe_user_pool_client.return_value = {"UserPoolClient": {
+        "CallbackURLs": ["https://example.cloudfront.net/"],
+        "LogoutURLs": ["https://example.cloudfront.net/"],
+        "AllowedOAuthFlowsUserPoolClient": True,
+        "AllowedOAuthFlows": ["code"], "AllowedOAuthScopes": ["openid"],
+    }}
     session.client.side_effect = lambda service, **_: {
-        "s3": s3_client, "cloudfront": cloudfront_client
+        "s3": s3_client, "cloudfront": cloudfront_client, "cognito-idp": cognito_client
     }[service]
 
     if not api_enabled:
@@ -107,3 +115,56 @@ def test_fallback_upload_invalidates_the_single_primary_distribution(monkeypatch
     assert storage.put_object.call_args.kwargs["Bucket"] == "error-bucket"
     assert storage.put_object.call_args.kwargs["CacheControl"] == "no-store"
     assert cdn.create_invalidation.call_args.kwargs["DistributionId"] == "shared"
+
+
+@pytest.mark.parametrize("problem", [None, "callback", "logout", "flow", "secret", "alias"])
+def test_custom_domain_checks_live_cognito_before_upload(monkeypatch, tmp_path, problem):
+    page = tmp_path / "index.html"
+    page.write_text("<title>Demo</title>")
+    monkeypatch.setattr(publisher, "site_files", lambda _: [(page, "index.html")])
+    def outputs(session, region, stack):
+        if stack == "SatiBotWebPrimary":
+            return {"PrimaryBucketName": "site", "PrimaryDistributionId": "distribution",
+                    "PrimaryDistributionDomain": "example.cloudfront.net"}
+        assert stack == "SatiBotWebAuth"
+        return {"UserPoolId": "ap-southeast-1_example", "UserPoolClientId": "client",
+                "HostedDomain": "example.auth.ap-southeast-1.amazoncognito.com",
+                "CallbackUrl": "https://example.cloudfront.net/"}
+    monkeypatch.setattr(publisher, "stack_outputs", outputs)
+    storage, cdn, cognito = Mock(), Mock(), Mock()
+    cdn.get_distribution_config.return_value = {"DistributionConfig": {
+        "Aliases": {"Items": [] if problem == "alias" else ["satibot.id.vn"]},
+        "CacheBehaviors": {"Items": [{"PathPattern": "api/*"}]},
+    }}
+    cdn.create_invalidation.return_value = {"Invalidation": {"Id": "one"}}
+    client = {"CallbackURLs": ["https://satibot.id.vn/"],
+              "LogoutURLs": ["https://satibot.id.vn/"],
+              "AllowedOAuthFlowsUserPoolClient": True,
+              "AllowedOAuthFlows": ["code"], "AllowedOAuthScopes": ["openid"]}
+    if problem == "callback":
+        client["CallbackURLs"] = []
+    if problem == "logout":
+        client["LogoutURLs"] = []
+    if problem == "flow":
+        client["AllowedOAuthFlows"] = ["implicit"]
+    if problem == "secret":
+        client["ClientSecret"] = "synthetic-test-secret"
+    cognito.describe_user_pool_client.return_value = {"UserPoolClient": client}
+    session = Mock()
+    session.client.side_effect = lambda service, **_: {
+        "s3": storage, "cloudfront": cdn, "cognito-idp": cognito,
+    }[service]
+    args = (session, "primary", "https://abc123.appsync-api.ap-southeast-1.amazonaws.com/graphql")
+    kwargs = {"frontend_origin": "https://satibot.id.vn", "auth_stack": "SatiBotWebAuth"}
+    if problem:
+        with pytest.raises(RuntimeError):
+            publisher.publish_site(*args, **kwargs)
+        storage.put_object.assert_not_called()
+        cdn.create_invalidation.assert_not_called()
+        return
+    publisher.publish_site(*args, **kwargs)
+    config = next(call.kwargs for call in storage.put_object.call_args_list
+                  if call.kwargs["Key"] == "site-config.json")
+    assert json.loads(config["Body"])["auth"]["redirect_uri"] == "https://satibot.id.vn/"
+    cognito.describe_user_pool_client.assert_called_once_with(
+        UserPoolId="ap-southeast-1_example", ClientId="client")

@@ -321,6 +321,26 @@ def test_list_instances_no_filter(mock_credentials, mock_boto_ec2, sample_ec2_in
     assert inst2["public_ip"] == ""  # No public IP
 
 
+@pytest.mark.parametrize("field,value", [
+    ("state_filter", "all"),
+    ("state", "all"),
+    ("state_filter", ["all"]),
+    ("state_filter", ["all", "running"]),
+])
+def test_list_instances_all_does_not_send_state_filter(
+    mock_credentials, mock_boto_ec2, sample_ec2_instances_raw, field, value
+):
+    client = mock_boto_ec2.return_value
+    client.describe_instances.return_value = sample_ec2_instances_raw
+
+    result = execute(mock_credentials, {"action": "list_ec2_instances", field: value})
+
+    client.describe_instances.assert_called_once_with()
+    assert result["success"] is True
+    assert len(result["data"]) == 2
+    assert result["message"] == "Tìm thấy 2 máy chủ EC2."
+
+
 def test_list_instances_with_state_filter_string(mock_credentials, mock_boto_ec2, sample_ec2_instances_raw):
     """Verify list_instances with state string parameter sets appropriate filter."""
     mock_client = mock_boto_ec2.return_value

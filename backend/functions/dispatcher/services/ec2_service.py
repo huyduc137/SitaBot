@@ -346,9 +346,12 @@ def _handle_list_instances(client, params: dict) -> dict:
         else:
             state_values = [str(state_filter).strip()]
 
-        describe_kwargs["Filters"] = [
-            {"Name": "instance-state-name", "Values": state_values}
-        ]
+        if "all" in state_values:
+            state_filter = None
+        else:
+            describe_kwargs["Filters"] = [
+                {"Name": "instance-state-name", "Values": state_values}
+            ]
 
     response = client.describe_instances(**describe_kwargs)
 
@@ -1022,7 +1025,7 @@ EC2_TOOL_SCHEMAS = [
                 "state_filter": {
                     "type": "string",
                     "enum": ["all", "running", "stopped", "pending", "shutting-down", "terminated"],
-                    "description": "Lọc theo trạng thái máy chủ (mặc định 'all' để xem tất cả)."
+                    "description": "Lọc theo trạng thái máy chủ. 'all' nghĩa là không áp dụng bộ lọc trạng thái, trả về tất cả máy chủ."
                 }
             }
         }

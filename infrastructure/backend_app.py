@@ -30,6 +30,7 @@ app = cdk.App()
 stack = cdk.Stack(
     app,
     "SatiBotBackend",
+    stack_name=app.node.try_get_context("backendStackName") or "SatiBotBackend",
     env=cdk.Environment(region=os.environ.get("PRIMARY_REGION", "ap-southeast-1")),
 )
 root = Path(__file__).resolve().parents[1]

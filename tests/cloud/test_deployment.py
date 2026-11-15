@@ -37,6 +37,22 @@ def synthed_backend_template(tmp_path_factory):
     return cdk_out / "SatiBotBackend.template.json"
 
 
+def test_existing_backend_stack_target_preserves_resource_ids(synthed_backend_template, tmp_path):
+    subprocess.run(
+        [sys.executable, str(ROOT / "infrastructure" / "backend_app.py")],
+        env={**os.environ, "CDK_OUTDIR": str(tmp_path), "PRIMARY_REGION": "ap-southeast-1",
+             "CDK_CONTEXT_JSON": json.dumps({"backendStackName": "SatiBotBackendSprint2"})},
+        check=True,
+    )
+    manifest = json.loads((tmp_path / "manifest.json").read_text())
+    assert manifest["artifacts"]["SatiBotBackend"]["properties"]["stackName"] == "SatiBotBackendSprint2"
+    baseline = json.loads(synthed_backend_template.read_text())["Resources"]
+    targeted = json.loads((tmp_path / "SatiBotBackend.template.json").read_text())["Resources"]
+    assert {key: value["Type"] for key, value in targeted.items()} == {
+        key: value["Type"] for key, value in baseline.items()}
+    verify_cdk_canary_template(tmp_path / "SatiBotBackend.template.json")
+
+
 def test_cdk_canary_stack_pipeline_and_alarm_rollback_simulation(
     synthed_backend_template,
 ):

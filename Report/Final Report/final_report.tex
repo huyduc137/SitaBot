@@ -1096,6 +1096,138 @@ Bên cạnh việc kiểm thử tính đúng đắn về mặt nghiệp vụ, nh
 Số liệu thực nghiệm cho thấy cơ chế tái sử dụng HTTPS keep-alive connection pool và STS cached client trong \code{Dispatcher} giúp giảm trung bình \textbf{63--66\%} độ trễ phản hồi giữa lần gọi đầu tiên và các lần gọi tiếp theo.
 
 \subsubsection{Nghiệm thu các kịch bản AWS IAM}
+\noindent\textbf{Kiểm thử các chức năng chính}
+
+\begingroup
+\setlength{\tabcolsep}{6pt}
+\renewcommand{\arraystretch}{1.15}
+\fontsize{10.5}{14}\selectfont
+\begin{longtable}{@{}
+  >{\raggedright\arraybackslash}p{4.8cm}
+  >{\raggedright\arraybackslash}p{\dimexpr\linewidth-4.8cm-2\tabcolsep\relax}@{}}
+\caption{Kết quả kiểm thử các chức năng chính của module AWS IAM}
+\label{tab:iam_functional_tests}\\
+\toprule
+\textbf{Kịch bản \& Guardrail an toàn} &
+\textbf{Kết quả thực hiện và đối chiếu thực tế}\\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Kịch bản \& Guardrail an toàn} &
+\textbf{Kết quả thực hiện và đối chiếu thực tế}\\
+\midrule
+\endhead
+\endfoot
+\bottomrule
+\endlastfoot
+
+1. Đọc và tra cứu Role/Policy &
+\textbf{Đạt.} Các ca kiểm thử xác nhận việc liệt kê Role và managed policy;
+đọc chi tiết Role, trust policy, managed policy và inline policy.
+Kết quả phân trang được tổng hợp theo phản hồi API mô phỏng.\\
+
+2. Tạo mới Role và Policy &
+\textbf{Đạt.} Kiểm tra tham số gọi API tạo Role với trust policy,
+tạo customer managed policy và tạo inline policy trong Role.
+Các thao tác ghi chỉ được thực hiện sau xác nhận hợp lệ.\\
+
+3. Sửa cấu hình và điều chỉnh quyền truy cập &
+\textbf{Đạt.} Kiểm tra việc cập nhật trust policy, tạo phiên bản
+mặc định mới cho customer managed policy, thay thế inline policy,
+gắn và tháo managed policy khỏi Role. Tham số của các lệnh ghi
+được đối chiếu với hợp đồng API trong bộ kiểm thử.\\
+
+4. Xóa Role/Policy an toàn có kiểm soát &
+\textbf{Đạt.} Kiểm tra xóa inline policy và quy trình preview trước
+khi xóa Role hoặc customer managed policy. Sau xác nhận, module
+tháo các liên kết thuộc phạm vi quản lý theo đúng thứ tự.
+Instance profile chỉ được xem xét xóa khi người dùng lựa chọn
+và đáp ứng các điều kiện kiểm tra.\\
+
+\end{longtable}
+\endgroup
+
+\noindent\textbf{Kiểm thử ngoại lệ và cơ chế bảo vệ}
+
+\begingroup
+\setlength{\tabcolsep}{6pt}
+\renewcommand{\arraystretch}{1.15}
+\fontsize{10.5}{14}\selectfont
+\begin{longtable}{@{}
+  >{\raggedright\arraybackslash}p{4.8cm}
+  >{\raggedright\arraybackslash}p{\dimexpr\linewidth-4.8cm-2\tabcolsep\relax}@{}}
+\caption{Kết quả kiểm thử ngoại lệ và cơ chế bảo vệ của module AWS IAM}
+\label{tab:iam_exception_tests}\\
+\toprule
+\textbf{Kịch bản \& Guardrail an toàn} &
+\textbf{Kết quả thực hiện và đối chiếu thực tế}\\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Kịch bản \& Guardrail an toàn} &
+\textbf{Kết quả thực hiện và đối chiếu thực tế}\\
+\midrule
+\endhead
+\endfoot
+\bottomrule
+\endlastfoot
+
+1. Kiểm tra tham số đầu vào &
+\textbf{Đạt.} Các ca kiểm thử code local phát hiện tham số thiếu,
+sai kiểu hoặc ngoài phạm vi cho phép. Nhánh hỏi bổ sung tại Chatbot
+không tạo action thực thi khi tham số chưa hợp lệ; sau khi bổ sung
+đủ thông tin, thao tác ghi chuyển sang bước chờ xác nhận.\\
+
+2. Kiểm tra cấu trúc Policy &
+\textbf{Đạt.} Tầng dịch vụ từ chối policy sai cấu trúc, còn placeholder
+hoặc chứa principal ngoài phạm vi hỗ trợ trước khi gọi API ghi IAM.
+Kết quả này xác nhận lớp kiểm tra tại dịch vụ, chưa khẳng định mọi
+lỗi policy đều được phát hiện trước bước xác nhận tại Chatbot.\\
+
+3. Xác nhận trước thao tác ghi &
+\textbf{Đạt.} Các lệnh thay đổi IAM không được thực hiện khi chưa có
+xác nhận hợp lệ. Bộ kiểm thử kiểm tra việc ràng buộc xác nhận với
+action đã lưu và không chấp nhận thay đổi tham số từ phía client.\\
+
+4. Đối soát Preview Fingerprint &
+\textbf{Đạt.} Khi các liên kết hiện tại khác snapshot đã duyệt,
+module yêu cầu xem và xác nhận lại trước khi xóa.
+Bộ kiểm thử cũng xác nhận việc thay đổi thứ tự liệt kê liên kết
+không làm sai lệch fingerprint.\\
+
+5. Phụ thuộc ngoài phạm vi quản lý &
+\textbf{Đạt.} Chặn xóa policy còn liên kết User/Group hoặc được
+sử dụng làm permissions boundary; không tự tháo các liên kết này.
+Phản hồi hướng dẫn xử lý phụ thuộc trên IAM Console.\\
+
+6. Bảo vệ Instance Profile đang được sử dụng &
+\textbf{Đạt.} Dừng trước các thay đổi liên quan khi kiểm tra phát hiện
+profile đang được sử dụng hoặc không đủ quyền xác minh.
+Profile vẫn còn Role sau khi tháo không được tiếp tục xóa.\\
+
+7. Bảo vệ AWS Managed Policy &
+\textbf{Đạt.} Từ chối sửa hoặc xóa AWS managed policy.
+Các thao tác cập nhật và xóa chỉ áp dụng cho customer managed policy.\\
+
+8. Xử lý \code{AccessDenied}, \code{DeleteConflict},
+\code{NoSuchEntity} &
+\textbf{Đạt.} Các lỗi AWS mô phỏng được giữ mã lỗi và trả thông tin
+hỗ trợ xử lý. Module không tuyên bố thao tác thành công khi API
+chưa xác nhận và ghi nhận các bước đã hoàn tất trước lỗi.\\
+
+9. Xử lý \code{Throttling} và \code{ServiceFailure} &
+\textbf{Đạt.} Phản hồi ghi nhận lỗi và tiến độ thực hiện,
+không tuyên bố đã rollback các thay đổi.
+Thông tin lỗi được xử lý để tránh làm lộ credential tạm thời.\\
+
+10. Giới hạn phiên bản Policy
+(\code{LimitExceeded}) &
+\textbf{Đạt.} Khi API cập nhật policy báo vượt giới hạn phiên bản,
+module giữ nguyên các phiên bản hiện có và trả lỗi để người dùng
+xử lý; không tự ý xóa phiên bản cũ nhằm vượt giới hạn.\\
+
+\end{longtable}
+\endgroup
 
 \subsubsection{Nghiệm thu kịch bản quản trị AWS Lambda qua giao diện ChatOps}
 
